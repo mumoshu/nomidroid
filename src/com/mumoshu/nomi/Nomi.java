@@ -26,13 +26,15 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Window;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
-import com.google.android.maps.OverlayItem;
+import com.mumoshu.maps.Marker;
 import com.mumoshu.maps.MarkerPane;
+import com.mumoshu.maps.TapListener;
 
 public class Nomi extends MapActivity implements LocationListener {
 	static final int INITIAL_ZOOM_LEVEL = 16;
@@ -132,7 +134,7 @@ public class Nomi extends MapActivity implements LocationListener {
 		
 		/* redraw the current location marker */
 		this.currentLocationMarkerPane.removeOverlays();
-		this.currentLocationMarkerPane.addOverlay(new OverlayItem(point, "title", "snippet"));
+		this.currentLocationMarkerPane.addOverlay(new Marker(point, "title", "snippet"));
 		
 		Log.i(this.getClass().getName(), "onLocationChanged:finish");
 	}
@@ -203,7 +205,18 @@ public class Nomi extends MapActivity implements LocationListener {
 				JSONObject shop = shopsJSON.getJSONObject(i);
 				shops.add(shop);
 				GeoPoint point = new GeoPoint((int)(shop.getDouble("lat") * 1E6), (int)(shop.getDouble("lng") * 1E6));
-				this.markerPane.addOverlay(new OverlayItem(point, shop.getString("name"), shop.getString("catch")));
+				final String shopName = shop.getString("name");
+				Marker marker = new Marker(point, shop.getString("name"), shop.getString("catch"));
+				Log.i(this.getClass().getName(), "shopName: " + shopName);
+				marker.addTapListener(new TapListener() {
+					@Override
+					public void onTap() {
+						Log.i(this.getClass().getName(), "onTap");
+						Toast.makeText(mapView.getContext(), shopName, Toast.LENGTH_SHORT).show();
+						Log.i("Toast.makeText",shopName);
+					}
+				});
+				this.markerPane.addOverlay(marker);
 				Log.i("shop point", point.toString());
 			}
 			
