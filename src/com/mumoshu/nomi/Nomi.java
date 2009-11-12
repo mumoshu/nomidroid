@@ -1,17 +1,10 @@
 package com.mumoshu.nomi;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -21,7 +14,6 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Window;
@@ -35,6 +27,8 @@ import com.google.android.maps.MapView;
 import com.mumoshu.maps.Marker;
 import com.mumoshu.maps.MarkerPane;
 import com.mumoshu.maps.TapListener;
+import com.mumoshu.net.GET;
+import com.mumoshu.patterns.Callbackable;
 
 public class Nomi extends MapActivity implements LocationListener {
 	static final int INITIAL_ZOOM_LEVEL = 16;
@@ -130,11 +124,9 @@ public class Nomi extends MapActivity implements LocationListener {
 		url += "&lat=" + String.valueOf(location.getLatitude());
 		url += "&lng=" + String.valueOf(location.getLongitude());
 		url += "&range=3&order=41&count=30&format=json";
-		//new HttpGetTask().execute(url);
-		AsyncHTTPGetTask.string(url, new Callbackable<String>() {
+		GET.json(url, new Callbackable<JSONObject>() {
 			@Override
-			public void callback(String data) {
-				Log.i(this.getClass().getName(), "callback -> showSpots(jsonString)");
+			public void callback(JSONObject data) {
 				showSpots(data);
 			}
 		});
@@ -194,17 +186,15 @@ public class Nomi extends MapActivity implements LocationListener {
 		
 	}
 	
-	public void showSpots(String jsonString) {
+	public void showSpots(JSONObject json) {
 		Log.i(this.getClass().getName(), "showSpots:start");
 		
 		this.markerPane.removeOverlays();
 		
-		JSONObject json = null;
 		JSONObject results = null;
 		JSONArray shopsJSON;
 		ArrayList<JSONObject> shops = new ArrayList<JSONObject>();
 		try {
-			json = new JSONObject(jsonString);
 			results = json.getJSONObject("results");
 			shopsJSON = results.getJSONArray("shop");
 			Log.i("Shops",String.valueOf(shopsJSON.length()));

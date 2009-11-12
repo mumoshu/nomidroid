@@ -18,7 +18,6 @@ public class MarkerPane extends ItemizedOverlay<Marker> {
 
 	public MarkerPane(Drawable defaultMarker) {
 		super(boundCenterBottom(defaultMarker));
-		// TODO Auto-generated constructor stub
 	}
 	
 	public void addOverlay(Marker overlay) {
