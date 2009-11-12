@@ -130,7 +130,14 @@ public class Nomi extends MapActivity implements LocationListener {
 		url += "&lat=" + String.valueOf(location.getLatitude());
 		url += "&lng=" + String.valueOf(location.getLongitude());
 		url += "&range=3&order=41&count=30&format=json";
-		new HttpGetTask().execute(url);
+		//new HttpGetTask().execute(url);
+		AsyncHTTPGetTask.string(url, new Callbackable<String>() {
+			@Override
+			public void callback(String data) {
+				Log.i(this.getClass().getName(), "callback -> showSpots(jsonString)");
+				showSpots(data);
+			}
+		});
 		
 		/* redraw the current location marker */
 		this.currentLocationMarkerPane.removeOverlays();
@@ -231,69 +238,5 @@ public class Nomi extends MapActivity implements LocationListener {
 		this.mapView.invalidate();
 		
 		Log.i(this.getClass().getName(), "showSpots:finish");
-	}
-			
-	public class HttpGetTask extends AsyncTask<String, Integer, String> {
-
-		@Override
-		protected String doInBackground(String... urls) {
-			Log.i(this.getClass().getName(), "doInBackground:start");
-			Log.i(this.getClass().getName(), "doInBackground:get " + urls[0]);
-			
-			DefaultHttpClient http = new DefaultHttpClient(); 
-			HttpGet get = new HttpGet();
-			HttpResponse res;
-			URI uri;
-			
-			try {
-			 uri = new URI(urls[0]);
-			} catch( URISyntaxException e) {
-				Log.e(this.getClass().toString(), e.getMessage());
-				e.printStackTrace();
-				return null;
-			}
-			
-			try {
-				get.setURI(uri);
-				res = http.execute(get);
-				int status = res.getStatusLine().getStatusCode();
-				if (200 <= status && status <= 304) {
-					BufferedReader stream = new BufferedReader(new InputStreamReader(res.getEntity().getContent())); 
-					StringBuffer strBuf = new StringBuffer();
-					try {
-						String line;
-						while ((line = stream.readLine()) != null) {
-							strBuf.append(line);
-						}
-					} catch (Exception e) {
-						Log.e(this.getClass().toString(), e.getMessage());
-						e.printStackTrace();
-						return null;
-					} finally {
-						try {
-							stream.close();
-						} catch (Exception e) {
-							Log.e(this.getClass().toString(), e.getMessage());
-							e.printStackTrace();
-						}
-					}
-					return strBuf.toString(); 
-				}
-			} catch (Exception e) {
-				Log.e(this.getClass().toString(), e.getMessage());
-				e.printStackTrace();
-			}
-			
-			Log.i(this.getClass().getName(), "doInBackground:finish");
-			
-			return null;
-		}
-		
-		@Override
-		protected void onPostExecute(String result) {
-			showSpots(result);
-			
-		}
-
 	}
 }
