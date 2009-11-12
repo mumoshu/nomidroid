@@ -35,7 +35,7 @@ import com.google.android.maps.OverlayItem;
 import com.mumoshu.maps.MarkerPane;
 
 public class Nomi extends MapActivity implements LocationListener {
-	static final int INITIAL_ZOOM_LEVEL = 11;
+	static final int INITIAL_ZOOM_LEVEL = 16;
 	static final int INITIAL_LATITUDE = 35455281;
 	static final int INITIAL_LONGITUDE = 139629711;
 	
@@ -44,12 +44,14 @@ public class Nomi extends MapActivity implements LocationListener {
 	protected GeoPoint initialPoint;
 	protected int initialZoom;
 	protected MarkerPane markerPane;
+	protected MarkerPane currentLocationMarkerPane;
 	protected LocationManager locationManager;
 	protected Geocoder geocoder;
 	protected TextView statusText;
 	
 	protected long minLocationUpdateTime = 1;
 	protected float minLocationUpdateDistance = 1.0f;
+
 
     /** Called when the activity is first created. */
     @Override
@@ -67,9 +69,11 @@ public class Nomi extends MapActivity implements LocationListener {
         this.mapController.setZoom(this.initialZoom);
         
         // TODO split markerPane for managing the center marker and the other markers independently.
-        this.markerPane = new MarkerPane(this.getResources().getDrawable(R.drawable.androidmarker));
+        this.currentLocationMarkerPane = new MarkerPane(this.getResources().getDrawable(R.drawable.androidmarker));
+        this.markerPane = new MarkerPane(this.getResources().getDrawable(R.drawable.bar));
+        this.mapView.getOverlays().add(this.currentLocationMarkerPane);
         this.mapView.getOverlays().add(this.markerPane);
-        this.markerPane.addOverlay(new OverlayItem(this.initialPoint, "title", "snippet"));
+        //this.currentLocationMarkerPane.addOverlay(new OverlayItem(this.initialPoint, "title", "snippet"));
         
         this.statusText = (TextView)findViewById(R.id.status_text);
         this.locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE); 
@@ -108,24 +112,43 @@ public class Nomi extends MapActivity implements LocationListener {
 
 	@Override
 	public void onLocationChanged(Location location) {
+		Log.i(this.getClass().getName(), "onLocationChanged:start");
+		
+		/* animate map to the current location, and show address */
 		GeoPoint point = new GeoPoint(
 				(int)(location.getLatitude() * 1E6),
 				(int)(location.getLongitude() * 1E6));
 		this.mapController.animateTo(point);
+		/* TODO should be executed in an async task? */
+		/* this requires 100~200ms to complete as it communicates with google's reverse geocoding service. */
 		this.showLocation(location);
+		
+		/* find and redraw nearby spots using the HotPepper API */
 		String url = "http://webservice.recruit.co.jp/hotpepper/gourmet/v1/?key=4e134a6779786c91";
 		url += "&lat=" + String.valueOf(location.getLatitude());
 		url += "&lng=" + String.valueOf(location.getLongitude());
-		url += "&range=5&order=41&format=json";
+		url += "&range=3&order=41&count=30&format=json";
 		new HttpGetTask().execute(url);
-		this.markerPane.addOverlay(new OverlayItem(point, "title", "snippet"));
+		
+		/* redraw the current location marker */
+		this.currentLocationMarkerPane.removeOverlays();
+		this.currentLocationMarkerPane.addOverlay(new OverlayItem(point, "title", "snippet"));
+		
+		Log.i(this.getClass().getName(), "onLocationChanged:finish");
 	}
 
+	/**
+	 * Determines the address for the given location, then displays it.
+	 * @param location current location, usually passed from LocationManager
+	 */
 	private void showLocation(Location location) {
+		Log.i(this.getClass().getName(), "showLocation:start");
+		
 		setProgressBarIndeterminateVisibility(true); 
 		double lat = location.getLatitude();
 		double lng = location.getLongitude();
 		StringBuffer buf = new StringBuffer();
+		buf.append("åªç›ín: ");
 		try {
 			List<Address> list = this.geocoder.getFromLocation(lat, lng, 1);
 			for (Address addr : list) {
@@ -140,6 +163,8 @@ public class Nomi extends MapActivity implements LocationListener {
 			Log.e(this.getClass().toString(), e.toString(), e);
 		}
 		this.statusText.setText(buf);
+		
+		Log.i(this.getClass().getName(), "showLocation:finish");
 	}
 
 	@Override
@@ -161,6 +186,10 @@ public class Nomi extends MapActivity implements LocationListener {
 	}
 	
 	public void showSpots(String jsonString) {
+		Log.i(this.getClass().getName(), "showSpots:start");
+		
+		this.markerPane.removeOverlays();
+		
 		JSONObject json = null;
 		JSONObject results = null;
 		JSONArray shopsJSON;
@@ -185,12 +214,18 @@ public class Nomi extends MapActivity implements LocationListener {
 			return;
 		}
 		setProgressBarIndeterminateVisibility(false); 
+		
+		this.mapView.invalidate();
+		
+		Log.i(this.getClass().getName(), "showSpots:finish");
 	}
 			
 	public class HttpGetTask extends AsyncTask<String, Integer, String> {
 
 		@Override
 		protected String doInBackground(String... urls) {
+			Log.i(this.getClass().getName(), "doInBackground:start");
+			Log.i(this.getClass().getName(), "doInBackground:get " + urls[0]);
 			
 			DefaultHttpClient http = new DefaultHttpClient(); 
 			HttpGet get = new HttpGet();
@@ -235,6 +270,8 @@ public class Nomi extends MapActivity implements LocationListener {
 				Log.e(this.getClass().toString(), e.getMessage());
 				e.printStackTrace();
 			}
+			
+			Log.i(this.getClass().getName(), "doInBackground:finish");
 			
 			return null;
 		}

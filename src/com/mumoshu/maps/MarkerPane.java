@@ -26,6 +26,11 @@ public class MarkerPane extends ItemizedOverlay<OverlayItem> {
 		overlays.add(overlay);
 		populate();
 	}
+	
+	public void removeOverlays() {
+		overlays.clear();
+		populate();
+	}
 
 	@Override
 	protected OverlayItem createItem(int i) {
@@ -36,5 +41,4 @@ public class MarkerPane extends ItemizedOverlay<OverlayItem> {
 	public int size() {
 		return overlays.size();
 	}
-
 }
