@@ -24,6 +24,7 @@ import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
+import com.google.android.maps.MapView.ReticleDrawMode;
 import com.mumoshu.maps.Marker;
 import com.mumoshu.maps.MarkerPane;
 import com.mumoshu.maps.TapListener;
@@ -63,6 +64,12 @@ public class Nomi extends MapActivity implements LocationListener {
         this.mapController = this.mapView.getController();
         this.mapController.setCenter(this.initialPoint);
         this.mapController.setZoom(this.initialZoom);
+        
+        /* show Zoom Controls when the map is clicked */
+        /* if you want to control the timing to show zoom controls, set this false anyway */
+        this.mapView.setBuiltInZoomControls(true);
+        
+        this.mapView.setReticleDrawMode(ReticleDrawMode.DRAW_RETICLE_OVER);
         
         // TODO split markerPane for managing the center marker and the other markers independently.
         this.currentLocationMarkerPane = new MarkerPane(this.getResources().getDrawable(R.drawable.androidmarker));
@@ -151,11 +158,41 @@ public class Nomi extends MapActivity implements LocationListener {
 		StringBuffer buf = new StringBuffer();
 		buf.append("åªç›ín: ");
 		try {
-			List<Address> list = this.geocoder.getFromLocation(lat, lng, 1);
+			List<Address> list = this.geocoder.getFromLocation(lat, lng, 5);
 			for (Address addr : list) {
 				int last = addr.getMaxAddressLineIndex();
+				String tag = "Address";
+				/* óXï÷î‘çÜ */
+				String postal = addr.getPostalCode();
+				/* ìsìπï{åß */
+				String adminArea = addr.getAdminArea();
+				/* ésãÊí¨ë∫ */
+				String locality = addr.getLocality();
+				/* í¨ñº */
+				String premises = addr.getPremises();
+				String subThoroughfare = addr.getSubThoroughfare();
+				String subAdminArea = addr.getSubAdminArea();
+				/* íö */
+				String thoroughfare = addr.getThoroughfare();
+				/* î‘ínÇªÇÃÇP */
+				/* î‘ínÇªÇÃÇQ */
+				String featureName = addr.getFeatureName();
+				String subLocality = addr.getSubLocality();
+				
+				Log.d(tag, "Address");
+				Log.d(tag, "PostalCode=" + postal);
+				Log.d(tag, "AdminArea=" + adminArea);
+				Log.d(tag, "Locality=" + locality);
+				Log.d(tag, "Throughfare=" + thoroughfare);
+				Log.d(tag, "FeatureName=" + featureName);
+				Log.d(tag, "SubLocality=" + subLocality);
+				Log.d(tag, "Premises=" + premises);
+				Log.d(tag, "SubAdminArea=" + subAdminArea);
+				Log.d(tag, "SubThoroughfare=" + subThoroughfare);
 				for (int i=0; i<=last; i++) {
-					buf.append(addr.getAddressLine(i));
+					String line = addr.getAddressLine(i);
+					Log.d(tag, "AddressLine[" + String.valueOf(i) + "]=" + line);
+					buf.append(line);
 					buf.append(" ");
 				}
 				buf.append("\n");

@@ -9,7 +9,6 @@
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content" 
     android:text="@string/hello"
-   	android:lines="2"
     />
 <com.google.android.maps.MapView
 	android:id="@+id/mapview"
