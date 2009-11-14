@@ -8,15 +8,22 @@ import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.Window;
+import android.view.View.OnTouchListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -81,6 +88,14 @@ public class Nomi extends MapActivity implements LocationListener {
         //this.currentLocationMarkerPane.addOverlay(new OverlayItem(this.initialPoint, "title", "snippet"));
         
         this.myLocationOverlay = new MyLocationOverlay(mapView.getContext(), mapView);
+        mapView.setOnTouchListener(new OnTouchListener() {
+			
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				// TODO Auto-generated method stub
+				return false;
+			}
+		});
         this.mapView.getOverlays().add(this.myLocationOverlay);
         
         this.statusText = (TextView)findViewById(R.id.status_text);
@@ -151,10 +166,26 @@ public class Nomi extends MapActivity implements LocationListener {
 		url += "&lat=" + String.valueOf(location.getLatitude());
 		url += "&lng=" + String.valueOf(location.getLongitude());
 		url += "&range=3&order=41&count=30&format=json";
+		final Context context = this;
 		GET.json(url, new Callbackable<JSONObject>() {
+			private boolean canceled = false;
+			private ProgressDialog dialog;
+			public void onInit() {
+				dialog = ProgressDialog.show(context, "title", "åüçıíÜ...", true, true, new OnCancelListener() {
+					@Override
+					public void onCancel(DialogInterface dialog) {
+						canceled = true;
+					}
+				});
+			}
 			@Override
 			public void callback(JSONObject data) {
-				showSpots(data);
+				if(!canceled) {
+					showSpots(data);
+				} else {
+					Log.d("callback","json loaded, but the operation had been canceled.");
+				}
+				dialog.dismiss();
 			}
 		});
 		
