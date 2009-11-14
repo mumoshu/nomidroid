@@ -24,6 +24,7 @@ import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
+import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.MapView.ReticleDrawMode;
 import com.mumoshu.maps.Marker;
 import com.mumoshu.maps.MarkerPane;
@@ -42,6 +43,7 @@ public class Nomi extends MapActivity implements LocationListener {
 	protected int initialZoom;
 	protected MarkerPane markerPane;
 	protected MarkerPane currentLocationMarkerPane;
+	protected MyLocationOverlay myLocationOverlay;
 	protected LocationManager locationManager;
 	protected Geocoder geocoder;
 	protected TextView statusText;
@@ -78,6 +80,9 @@ public class Nomi extends MapActivity implements LocationListener {
         this.mapView.getOverlays().add(this.markerPane);
         //this.currentLocationMarkerPane.addOverlay(new OverlayItem(this.initialPoint, "title", "snippet"));
         
+        this.myLocationOverlay = new MyLocationOverlay(mapView.getContext(), mapView);
+        this.mapView.getOverlays().add(this.myLocationOverlay);
+        
         this.statusText = (TextView)findViewById(R.id.status_text);
         this.locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE); 
         this.geocoder = new Geocoder(getApplicationContext(), Locale.JAPAN);
@@ -89,12 +94,22 @@ public class Nomi extends MapActivity implements LocationListener {
 		return false;
 	}
 
+	/**
+	 * called when another activity comes in front of the activity
+	 * the activity could be killed or stopped(onStop() will be called) afterwards
+	 */
 	@Override
 	protected void onPause() {
 		super.onPause();
 		this.locationManager.removeUpdates(this);
+		
+		myLocationOverlay.disableCompass();
+		myLocationOverlay.disableMyLocation();
 	}
 
+	/**
+	 * called when the activity comes to the foreground
+	 */
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -111,6 +126,11 @@ public class Nomi extends MapActivity implements LocationListener {
 				this.minLocationUpdateTime,
 				this.minLocationUpdateDistance,
 				this);
+		
+		if(!myLocationOverlay.enableCompass()) {
+			Toast.makeText(mapView.getContext(), "コンパスが使えないようです", Toast.LENGTH_SHORT);
+		}
+		myLocationOverlay.enableMyLocation();
 	}
 
 	@Override
