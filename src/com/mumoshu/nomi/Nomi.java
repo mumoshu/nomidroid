@@ -20,9 +20,12 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -149,22 +152,38 @@ public class Nomi extends MapActivity implements LocationListener {
 	}
 
 	@Override
-	public void onLocationChanged(Location location) {
-		Log.i(this.getClass().getName(), "onLocationChanged:start");
-		
-		/* animate map to the current location, and show address */
-		GeoPoint point = new GeoPoint(
-				(int)(location.getLatitude() * 1E6),
-				(int)(location.getLongitude() * 1E6));
-		this.mapController.animateTo(point);
-		/* TODO should be executed in an async task? */
-		/* this requires 100~200ms to complete as it communicates with google's reverse geocoding service. */
-		this.showLocation(location);
-		
+	protected void onDestroy() {
+		super.onDestroy();
+		locationManager.removeUpdates(this);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MapActivity map = this;
+		MenuItem item = menu.add("åüçı");
+		item.setIcon(R.drawable.androidmarker);
+		item.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+			@Override
+			public boolean onMenuItemClick(MenuItem item) {
+				searchSpotsOnMapCenter();
+				return false;
+			}
+		});
+		return super.onCreateOptionsMenu(menu);
+	}
+	
+	public void searchSpotsOnMapCenter() {
+		GeoPoint p = mapView.getMapCenter();
+		double lat = (double)p.getLatitudeE6() / 1E6;
+		double lng = (double)p.getLongitudeE6() / 1E6;
+		searchSpots(lat,lng);
+	}
+	
+	public void searchSpots(double lat, double lng) {
 		/* find and redraw nearby spots using the HotPepper API */
 		String url = "http://webservice.recruit.co.jp/hotpepper/gourmet/v1/?key=4e134a6779786c91";
-		url += "&lat=" + String.valueOf(location.getLatitude());
-		url += "&lng=" + String.valueOf(location.getLongitude());
+		url += "&lat=" + String.valueOf(lat);
+		url += "&lng=" + String.valueOf(lng);
 		url += "&range=3&order=41&count=30&format=json";
 		final Context context = this;
 		GET.json(url, new Callbackable<JSONObject>() {
@@ -188,6 +207,22 @@ public class Nomi extends MapActivity implements LocationListener {
 				dialog.dismiss();
 			}
 		});
+	}
+	
+	@Override
+	public void onLocationChanged(Location location) {
+		Log.i(this.getClass().getName(), "onLocationChanged:start");
+		
+		/* animate map to the current location, and show address */
+		GeoPoint point = new GeoPoint(
+				(int)(location.getLatitude() * 1E6),
+				(int)(location.getLongitude() * 1E6));
+		this.mapController.animateTo(point);
+		/* TODO should be executed in an async task? */
+		/* this requires 100~200ms to complete as it communicates with google's reverse geocoding service. */
+		this.showLocation(location);
+		
+		searchSpots(location.getLatitude(), location.getLongitude());
 		
 		/* redraw the current location marker */
 		this.currentLocationMarkerPane.removeOverlays();
