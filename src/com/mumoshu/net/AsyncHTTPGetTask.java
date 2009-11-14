@@ -12,33 +12,32 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import com.mumoshu.patterns.Callbackable;
-
 import android.os.AsyncTask;
 import android.util.Log;
+
+import com.mumoshu.patterns.Callbackable;
+import com.mumoshu.patterns.Parser;
 
 /**
  * @author mumoshu
  * AsyncTask's 2nd parameter:Integer is not used.
  */
-public class AsyncHTTPGetTask extends
-		AsyncTask<String, Integer, String> {
+public class AsyncHTTPGetTask<Result> extends
+		AsyncTask<String, Integer, Result> {
 	
-	private Callbackable<String> callbackable;
-	
-	public static void string(String url, Callbackable<String> callbackable_) {
-		new AsyncHTTPGetTask(callbackable_).execute(url);
-	}
-	
-	public AsyncHTTPGetTask(Callbackable<String> callbackable_) {
+	private Callbackable<Result> callbackable;
+	private Parser<Result> parser;
+
+	public AsyncHTTPGetTask(Parser<Result> parser, Callbackable<Result> callbackable_) {
 		this.callbackable = callbackable_;
+		this.parser = parser;
 	}
 
 	/* (non-Javadoc)
 	 * @see android.os.AsyncTask#doInBackground(Params[])
 	 */
 	@Override
-	protected String doInBackground(String... urls) {
+	protected Result doInBackground(String... urls) {
 		Log.i(this.getClass().getName(), "doInBackground:start");
 		Log.i(this.getClass().getName(), "doInBackground:get " + urls[0]);
 		
@@ -79,7 +78,10 @@ public class AsyncHTTPGetTask extends
 						e.printStackTrace();
 					}
 				}
-				return strBuf.toString(); 
+				Log.d("Parser", "start");
+				Result result = parser.parse(strBuf.toString());
+				Log.d("Parser", "finish");
+				return result;
 			}
 		} catch (Exception e) {
 			Log.e(this.getClass().toString(), e.getMessage());
@@ -92,7 +94,7 @@ public class AsyncHTTPGetTask extends
 	}
 	
 	@Override
-	protected void onPostExecute(String result) {
+	protected void onPostExecute(Result result) {
 		this.callbackable.callback(result);
 	}
 

@@ -5,9 +5,7 @@ package com.mumoshu.net;
 
 import org.json.JSONObject;
 
-import android.os.AsyncTask;
-import android.util.Log;
-
+import com.mumoshu.parsers.JSONParser;
 import com.mumoshu.patterns.Callbackable;
 
 /**
@@ -15,32 +13,17 @@ import com.mumoshu.patterns.Callbackable;
  *
  */
 public class GET {
+	private static JSONParser jsonParser = new JSONParser();
+	
 	public static void json(String url, Callbackable<JSONObject> observer_) {
 		final Callbackable<JSONObject> observer = observer_;
-		AsyncHTTPGetTask.string(url, new Callbackable<String>() {
+		/* TODO catch exceptions in the json parser here */
+		new AsyncHTTPGetTask<JSONObject>(jsonParser, new Callbackable<JSONObject>() {
 			@Override
-			public void callback(String data) {
-				new AsyncTask<String, Integer, JSONObject>() {
-					@Override
-					protected JSONObject doInBackground(String... params) {
-						JSONObject json = null;
-						String data = params[0];
-						try {
-							json = new JSONObject(data);
-						} catch (Exception e) {
-							Log.e(this.getClass().toString(), e.getMessage());
-							e.printStackTrace();
-							Log.e(this.getClass().getName(), "json: " + data);
-							return null;
-						}
-						return json;
-					}
-					protected void onPostExecute(JSONObject json) {
-						observer.callback(json);						
-					}
-				}.execute(data);
+			public void callback(JSONObject data) {
+				observer.callback(data);
 			}
-		});
+		}).execute(url);
 	}
 
 }
