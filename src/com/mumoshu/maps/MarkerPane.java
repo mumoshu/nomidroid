@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.MapView;
@@ -26,6 +27,8 @@ public class MarkerPane extends ItemizedOverlay<Marker> {
 		this.defaultMarker = defaultMarker;
 		/* draw focused item myself */
 		this.transparentFocused = transparentFocused;
+		/* YOU MUST CALL populate() before you do anything, thus you must call it here */
+		populate();
 	}
 	
 	/* (non-Javadoc)
@@ -33,6 +36,7 @@ public class MarkerPane extends ItemizedOverlay<Marker> {
 	 */
 	@Override
 	public void draw(Canvas canvas, MapView mapView, boolean shadow) {
+		Log.d("draw", "");
 		if(!transparentFocused) {
 			super.draw(canvas, mapView, shadow);
 			return;
@@ -96,6 +100,7 @@ public class MarkerPane extends ItemizedOverlay<Marker> {
 	
 	@Override
 	public boolean onTap(int index) {
+		Log.d("MarkerPane", "onTap OverlayItem #" + String.valueOf(index));
 		Marker marker = createItem(index);
 		setFocus(marker);
 		marker.onTap();

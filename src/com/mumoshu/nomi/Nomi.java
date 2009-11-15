@@ -1,6 +1,9 @@
 package com.mumoshu.nomi;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -8,6 +11,7 @@ import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -60,6 +64,10 @@ public class Nomi extends MapActivity implements LocationListener {
 	
 	protected long minLocationUpdateTime = 1;
 	protected float minLocationUpdateDistance = 1.0f;
+	
+	private static final int SHOP_DETAILS_DIALOG = 0;
+	
+	private ShopDialog shopDialog;
 
 
     /** Called when the activity is first created. */
@@ -97,7 +105,7 @@ public class Nomi extends MapActivity implements LocationListener {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
 				// TODO Auto-generated method stub
-				Log.d("Touch", event.toString());
+				Log.d("Touch", "");
 				return false;
 			}
 		});
@@ -106,6 +114,8 @@ public class Nomi extends MapActivity implements LocationListener {
         this.statusText = (TextView)findViewById(R.id.status_text);
         this.locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE); 
         this.geocoder = new Geocoder(getApplicationContext(), Locale.JAPAN);
+        
+        shopDialog = new ShopDialog(this);
     }
 
 	@Override
@@ -173,6 +183,30 @@ public class Nomi extends MapActivity implements LocationListener {
 		return super.onCreateOptionsMenu(menu);
 	}
 	
+    public Drawable loadImage(String str){
+    	Drawable d = null;
+    	try{
+    		URL url = new URL(str);
+    		HttpURLConnection http = (HttpURLConnection)url.openConnection();
+    		http.setRequestMethod("GET");
+    		http.connect();
+    		InputStream in = http.getInputStream();
+    		d = Drawable.createFromStream(in, "a");
+            in.close();
+    	}catch(Exception e){
+    	}
+    	d.setBounds(0, 0, d.getIntrinsicWidth(), d.getIntrinsicWidth());
+    	return d;
+    }
+	
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onCreateDialog(int)
+	 */
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		return shopDialog;
+	}
+
 	public void searchSpotsOnMapCenter() {
 		GeoPoint p = mapView.getMapCenter();
 		double lat = (double)p.getLatitudeE6() / 1E6;
@@ -223,7 +257,7 @@ public class Nomi extends MapActivity implements LocationListener {
 		/* this requires 100~200ms to complete as it communicates with google's reverse geocoding service. */
 		this.showLocation(location);
 		
-		searchSpots(location.getLatitude(), location.getLongitude());
+		//searchSpots(location.getLatitude(), location.getLongitude());
 		
 		/* redraw the current location marker */
 		this.currentLocationMarkerPane.removeOverlays();
@@ -289,6 +323,8 @@ public class Nomi extends MapActivity implements LocationListener {
 		}
 		this.statusText.setText(buf);
 		
+		setProgressBarIndeterminateVisibility(false); 
+		
 		Log.i(this.getClass().getName(), "showLocation:finish");
 	}
 
@@ -326,14 +362,29 @@ public class Nomi extends MapActivity implements LocationListener {
 				JSONObject shop = shopsJSON.getJSONObject(i);
 				shops.add(shop);
 				GeoPoint point = new GeoPoint((int)(shop.getDouble("lat") * 1E6), (int)(shop.getDouble("lng") * 1E6));
+				JSONObject genre = shop.getJSONObject("genre");
+				String genreCode = genre.getString("code");
+				final String genreCatch = genre.getString("catch");
+				String ktaiCoupon = shop.getString("ktai_coupon");
+				JSONObject urls = shop.getJSONObject("urls");
+				final String url = urls.getString("pc");
 				final String shopName = shop.getString("name");
+				final String open = shop.getString("open");
+				JSONObject photo = shop.getJSONObject("photo");
+				JSONObject mobilePhoto = photo.getJSONObject("mobile");
+				String imageUrl = mobilePhoto.getString("s");
+				final Drawable image = loadImage(imageUrl);
 				Marker marker = new Marker(point, shop.getString("name"), shop.getString("catch"));
 				Log.i(this.getClass().getName(), "shopName: " + shopName);
+				Log.i("Shop", genreCode);
+				Log.i("Shop", ktaiCoupon);
 				marker.addTapListener(new TapListener() {
 					@Override
 					public void onTap() {
 						Log.i(this.getClass().getName(), "onTap");
 						Toast.makeText(mapView.getContext(), shopName, Toast.LENGTH_SHORT).show();
+						shopDialog.set(shopName, genreCatch, open, image, url);
+						showDialog(SHOP_DETAILS_DIALOG);
 						Log.i("Toast.makeText",shopName);
 					}
 				});
@@ -345,9 +396,8 @@ public class Nomi extends MapActivity implements LocationListener {
 			Log.e(this.getClass().toString(), e.getMessage());
 			e.printStackTrace();
 			Log.e("results:", results.toString());
-			return;
 		}
-		setProgressBarIndeterminateVisibility(false); 
+
 		
 		this.mapView.invalidate();
 		

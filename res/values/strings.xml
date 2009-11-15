@@ -2,4 +2,6 @@
 <resources>
     <string name="hello">Hello World, Nomi!</string>
     <string name="app_name">今から呑みに行けるところサーチ</string>
+<string name="openUrlButtonText">詳細</string>
+<string name="closeButtonText">閉じる</string>
 </resources>
