@@ -2,17 +2,17 @@
 <LinearLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="fill_parent"
-  android:orientation="vertical" android:layout_height="fill_parent" android:padding="10px">
+  android:orientation="vertical" android:padding="10px" android:layout_height="wrap_content">
 
 
 
 
 
-<LinearLayout android:id="@+id/LinearLayout02" android:orientation="horizontal" android:layout_height="wrap_content" android:layout_width="fill_parent" android:scrollbarStyle="insideInset" android:scrollbars="vertical" android:layout_marginBottom="5px">
-	<ImageView android:id="@+id/image" android:layout_width="140px" android:layout_height="160px" android:scaleType="fitCenter" android:padding="5px"></ImageView>
+<TextView android:text="@+id/name" android:id="@+id/name" android:layout_height="wrap_content" android:layout_width="fill_parent" android:textStyle="bold" android:textSize="10pt"></TextView><TextView android:text="@+id/genre" android:id="@+id/genre" android:layout_height="wrap_content" android:layout_width="fill_parent"></TextView><LinearLayout android:id="@+id/LinearLayout02" android:orientation="horizontal" android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_marginBottom="5px" android:layout_gravity="top">
+	<ImageView android:id="@+id/image" android:adjustViewBounds="true" android:layout_marginBottom="10px" android:layout_marginTop="5px" android:layout_height="120px" android:layout_width="110px" android:layout_marginRight="5px"></ImageView>
 	<LinearLayout android:id="@+id/LinearLayout03" android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical">
-		<TextView android:text="@+id/name" android:id="@+id/name" android:layout_height="wrap_content" android:layout_width="fill_parent"></TextView>
-		<TextView android:text="@+id/genre" android:id="@+id/genre" android:layout_height="wrap_content" android:layout_width="fill_parent"></TextView>
+		
+		
 		<TextView android:text="@+id/description" android:id="@+id/description" android:layout_height="wrap_content" android:layout_width="fill_parent"></TextView>
 	</LinearLayout>
 </LinearLayout>

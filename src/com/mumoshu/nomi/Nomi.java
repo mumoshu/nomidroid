@@ -82,7 +82,7 @@ public class Nomi extends MapActivity implements LocationListener {
         
         this.mapView = (MapView)findViewById(R.id.mapview);
         this.mapController = this.mapView.getController();
-        this.mapController.setCenter(this.initialPoint);
+        //this.mapController.setCenter(this.initialPoint);
         this.mapController.setZoom(this.initialZoom);
         
         /* show Zoom Controls when the map is clicked */
