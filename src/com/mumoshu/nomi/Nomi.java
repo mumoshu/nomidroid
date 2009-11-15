@@ -12,13 +12,13 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -84,8 +84,9 @@ public class Nomi extends MapActivity implements LocationListener {
         this.mapView.setReticleDrawMode(ReticleDrawMode.DRAW_RETICLE_OVER);
         
         // TODO split markerPane for managing the center marker and the other markers independently.
-        this.currentLocationMarkerPane = new MarkerPane(this.getResources().getDrawable(R.drawable.androidmarker));
-        this.markerPane = new MarkerPane(this.getResources().getDrawable(R.drawable.bar));
+        this.currentLocationMarkerPane = new MarkerPane(this.getResources().getDrawable(R.drawable.androidmarker),false);
+        Drawable bar = this.getResources().getDrawable(R.drawable.bar);
+        this.markerPane = new MarkerPane(bar,true);
         this.mapView.getOverlays().add(this.currentLocationMarkerPane);
         this.mapView.getOverlays().add(this.markerPane);
         //this.currentLocationMarkerPane.addOverlay(new OverlayItem(this.initialPoint, "title", "snippet"));
@@ -96,6 +97,7 @@ public class Nomi extends MapActivity implements LocationListener {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
 				// TODO Auto-generated method stub
+				Log.d("Touch", event.toString());
 				return false;
 			}
 		});
@@ -159,7 +161,6 @@ public class Nomi extends MapActivity implements LocationListener {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		MapActivity map = this;
 		MenuItem item = menu.add("åüçı");
 		item.setIcon(R.drawable.androidmarker);
 		item.setOnMenuItemClickListener(new OnMenuItemClickListener() {
