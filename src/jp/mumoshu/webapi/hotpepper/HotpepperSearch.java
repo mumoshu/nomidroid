@@ -23,8 +23,10 @@ public class HotpepperSearch {
 	}
 	public Uri requestUri(){
 		Builder b = new Builder();
-		b.appendPath(API_URL);
-		b.appendQueryParameter("key", apiKey);
+		b.scheme("http")
+			.authority("webservice.recruit.co.jp")
+			.path("hotpepper/gourmet/v1")
+			.appendQueryParameter("key", apiKey);
 		condition.appendQueryParametersTo(b);
 		return b.build();
 	}
