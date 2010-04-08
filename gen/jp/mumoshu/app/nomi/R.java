@@ -16,28 +16,32 @@ public final class R {
         public static final int icon=0x7f020002;
     }
     public static final class id {
-        public static final int HorizontalScrollView01=0x7f05000b;
-        public static final int LinearLayout01=0x7f050008;
-        public static final int LinearLayout02=0x7f050004;
-        public static final int LinearLayout03=0x7f050006;
-        public static final int closeButton=0x7f05000a;
-        public static final int description=0x7f050007;
-        public static final int genre=0x7f050003;
-        public static final int image=0x7f050005;
-        public static final int mapview=0x7f050001;
-        public static final int name=0x7f050002;
-        public static final int openUrlButton=0x7f050009;
-        public static final int status_text=0x7f050000;
+        public static final int HorizontalScrollView01=0x7f06000b;
+        public static final int LinearLayout01=0x7f060008;
+        public static final int LinearLayout02=0x7f060004;
+        public static final int LinearLayout03=0x7f060006;
+        public static final int closeButton=0x7f06000a;
+        public static final int description=0x7f060007;
+        public static final int genre=0x7f060003;
+        public static final int image=0x7f060005;
+        public static final int mapview=0x7f060001;
+        public static final int name=0x7f060002;
+        public static final int openUrlButton=0x7f060009;
+        public static final int status_text=0x7f060000;
     }
     public static final class layout {
         public static final int main=0x7f030000;
         public static final int shop_details=0x7f030001;
         public static final int spot_map=0x7f030002;
     }
+    public static final class raw {
+        public static final int v1=0x7f040000;
+        public static final int v1_json=0x7f040001;
+    }
     public static final class string {
-        public static final int app_name=0x7f040001;
-        public static final int closeButtonText=0x7f040003;
-        public static final int hello=0x7f040000;
-        public static final int openUrlButtonText=0x7f040002;
+        public static final int app_name=0x7f050001;
+        public static final int closeButtonText=0x7f050003;
+        public static final int hello=0x7f050000;
+        public static final int openUrlButtonText=0x7f050002;
     }
 }
